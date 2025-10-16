@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 export function StudentTestTaker({ test }: { test: any }) {
   const [answers, setAnswers] = useState<any[]>(Array((test?.items || []).length).fill(""))
   const [submitting, setSubmitting] = useState(false)
+  const [files, setFiles] = useState<File[]>([])
 
   function setAns(index: number, value: any) {
     setAnswers((prev) => {
@@ -69,16 +70,38 @@ export function StudentTestTaker({ test }: { test: any }) {
           </div>
         ))}
       </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium">Attachments (PDF, DOC, Images)</label>
+        <input
+          type="file"
+          multiple
+          accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+          onChange={(e) => {
+            const list = e.target.files ? Array.from(e.target.files) : []
+            setFiles(list)
+          }}
+        />
+        {files.length > 0 && (
+          <div className="text-xs text-muted-foreground">{files.length} file(s) selected</div>
+        )}
+      </div>
       <div>
         <Button
           disabled={submitting}
           onClick={async () => {
             setSubmitting(true)
-            await fetch(`/api/tests/${test._id}/submissions`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ answers }),
-            })
+            if (files.length > 0) {
+              const form = new FormData()
+              form.set("answers", JSON.stringify(answers))
+              for (const f of files) form.append("files", f)
+              await fetch(`/api/tests/${test._id}/submissions`, { method: "POST", body: form })
+            } else {
+              await fetch(`/api/tests/${test._id}/submissions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answers }),
+              })
+            }
             window.location.href = "/student/submissions"
           }}
         >
