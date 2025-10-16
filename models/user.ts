@@ -13,7 +13,7 @@ const UserSchema = new Schema<UserDoc>({
   email: { type: String, required: true, unique: true, index: true },
   password: { type: String },
   role: { type: String, enum: ["student", "teacher", "admin"], default: "student", required: true },
-})
+}, { timestamps: true })
 
 export const UserModel: Model<UserDoc> =
   (mongoose.models.User as Model<UserDoc>) || mongoose.model<UserDoc>("User", UserSchema)

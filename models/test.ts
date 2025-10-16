@@ -6,6 +6,8 @@ export interface TestDoc extends mongoose.Document {
   questions: string[]
   teacherId: string
   status: "draft" | "published"
+  startAt?: Date | null
+  endAt?: Date | null
   createdAt: Date
 }
 
@@ -15,6 +17,8 @@ const TestSchema = new Schema<TestDoc>({
   questions: { type: [String], default: [] },
   teacherId: { type: String, required: true, index: true },
   status: { type: String, enum: ["draft", "published"], default: "draft" },
+  startAt: { type: Date, default: null },
+  endAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
 })
 

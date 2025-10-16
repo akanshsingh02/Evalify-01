@@ -13,6 +13,8 @@ export function TeacherManager() {
   const [tests, setTests] = useState<any[]>([])
   const [selectedTestId, setSelectedTestId] = useState<string>("")
   const [submissions, setSubmissions] = useState<any[]>([])
+  const [startAt, setStartAt] = useState<string>("")
+  const [endAt, setEndAt] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
   async function loadTests() {
@@ -43,6 +45,22 @@ export function TeacherManager() {
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Input placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
         <Textarea placeholder="One question per line" value={questions} onChange={(e) => setQuestions(e.target.value)} />
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <input
+            type="datetime-local"
+            className="h-9 rounded-md border px-2 text-sm"
+            value={startAt}
+            onChange={(e) => setStartAt(e.target.value)}
+            placeholder="Start time"
+          />
+          <input
+            type="datetime-local"
+            className="h-9 rounded-md border px-2 text-sm"
+            value={endAt}
+            onChange={(e) => setEndAt(e.target.value)}
+            placeholder="End time"
+          />
+        </div>
         <div className="flex gap-2">
           <Button
             disabled={loading || !title}
@@ -51,11 +69,13 @@ export function TeacherManager() {
               await fetch("/api/tests", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, questions, status: "draft" }),
+                body: JSON.stringify({ title, description, questions, status: "draft", startAt, endAt }),
               })
               setTitle("")
               setDescription("")
               setQuestions("")
+              setStartAt("")
+              setEndAt("")
               await loadTests()
               setLoading(false)
             }}
@@ -70,11 +90,13 @@ export function TeacherManager() {
               await fetch("/api/tests", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, questions, status: "published" }),
+                body: JSON.stringify({ title, description, questions, status: "published", startAt, endAt }),
               })
               setTitle("")
               setDescription("")
               setQuestions("")
+              setStartAt("")
+              setEndAt("")
               await loadTests()
               setLoading(false)
             }}
@@ -90,6 +112,9 @@ export function TeacherManager() {
                 <div className="text-xs uppercase text-muted-foreground">{t.status}</div>
               </div>
               <div className="mt-2 text-sm text-muted-foreground">{t.description}</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {t.startAt ? `Starts: ${new Date(t.startAt).toLocaleString()}` : "No start"} · {t.endAt ? `Ends: ${new Date(t.endAt).toLocaleString()}` : "No end"}
+              </div>
               <div className="mt-2 flex gap-2">
                 <Button
                   size="sm"
@@ -100,6 +125,22 @@ export function TeacherManager() {
                   }}
                 >
                   {t.status === "published" ? "Unpublish" : "Publish"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const ns = prompt("Enter new start date-time (YYYY-MM-DDTHH:mm) or leave blank to clear", t.startAt ? new Date(t.startAt).toISOString().slice(0, 16) : "")
+                    const ne = prompt("Enter new end date-time (YYYY-MM-DDTHH:mm) or leave blank to clear", t.endAt ? new Date(t.endAt).toISOString().slice(0, 16) : "")
+                    await fetch(`/api/tests/${t._id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ startAt: ns ? ns : null, endAt: ne ? ne : null }),
+                    })
+                    await loadTests()
+                  }}
+                >
+                  Edit Schedule
                 </Button>
                 <Button size="sm" onClick={() => setSelectedTestId(String(t._id))}>
                   View Submissions

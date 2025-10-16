@@ -3,6 +3,10 @@ import { auth } from "@/auth"
 import { connectToDatabase } from "@/lib/mongodb"
 import { TestModel } from "@/models/test"
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 export async function GET(req: Request) {
   const session = await auth()
   const url = new URL(req.url)
@@ -19,7 +23,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ tests })
   }
   if (role === "student") {
-    const tests = await TestModel.find({ status: "published" }).sort({ createdAt: -1 }).lean()
+    const now = new Date()
+    const tests = await TestModel.find({
+      status: "published",
+      $and: [
+        { $or: [{ startAt: null }, { startAt: { $lte: now } }] },
+        { $or: [{ endAt: null }, { endAt: { $gte: now } }] },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .lean()
     return NextResponse.json({ tests })
   }
   return NextResponse.json({ tests: [] })
@@ -39,6 +52,8 @@ export async function POST(req: Request) {
     questions: Array.isArray(body.questions) ? body.questions : typeof body.questions === "string" ? body.questions.split("\n").filter(Boolean) : [],
     teacherId: (session.user as any).id,
     status: body.status === "published" ? "published" : "draft",
+    startAt: body.startAt ? new Date(body.startAt) : null,
+    endAt: body.endAt ? new Date(body.endAt) : null,
   })
   return NextResponse.json({ test: { id: String(doc._id) } }, { status: 201 })
 }
