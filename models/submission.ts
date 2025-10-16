@@ -1,28 +1,22 @@
 import mongoose, { Schema, Model } from "mongoose"
 
 export interface SubmissionDoc extends mongoose.Document {
-  testId: string
   studentId: string
-  answers: string[]
+  testId?: string
+  assignmentId?: string
+  answers?: any
   score?: number
-  results?: Array<{ score: number; maxPoints: number; correct?: boolean; similarity?: number }>
-  totalScore?: number
-  maxScore?: number
-  overriddenScore?: number | null
-  autoGraded: boolean
+  status: "Pending" | "Evaluated" | "Re-evaluated"
   createdAt: Date
 }
 
 const SubmissionSchema = new Schema<SubmissionDoc>({
-  testId: { type: String, required: true, index: true },
-  studentId: { type: String, required: true, index: true },
-  answers: { type: [String], default: [] },
+  studentId: { type: String, index: true, required: true },
+  testId: { type: String },
+  assignmentId: { type: String },
+  answers: { type: Schema.Types.Mixed },
   score: { type: Number },
-  results: { type: [Object], default: [] },
-  totalScore: { type: Number },
-  maxScore: { type: Number },
-  overriddenScore: { type: Number, default: null },
-  autoGraded: { type: Boolean, default: false },
+  status: { type: String, enum: ["Pending", "Evaluated", "Re-evaluated"], default: "Pending" },
   createdAt: { type: Date, default: Date.now },
 })
 
