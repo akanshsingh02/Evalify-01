@@ -1,11 +1,9 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PerformanceChart } from "@/components/charts/performance-chart"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
-import { useSession } from "next-auth/react"
+import { auth } from "@/auth"
 
 const submissions = [
   { id: "RPT-1001", subject: "Mathematics", date: "2025-09-12", status: "Evaluated", score: 84, plag: 2 },
@@ -13,8 +11,8 @@ const submissions = [
   { id: "RPT-1003", subject: "Chemistry", date: "2025-10-01", status: "Re-evaluated", score: 88, plag: 1 },
 ]
 
-export default function StudentDashboard() {
-  const { data: session } = useSession()
+export default async function StudentDashboard() {
+  const session = await auth()
   const role = (session?.user as any)?.role
   if (!session || !["student", "admin"].includes(role)) {
     return null

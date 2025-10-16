@@ -94,13 +94,13 @@ export default function RegisterPage() {
                   setLoading(false)
                   return
                 }
-                // Auto sign in client-side to avoid CSRF issues
                 const signInRes = await signIn("credentials", { redirect: false, email, password })
-                // Fetch session to decide redirect
-                const sRes = await fetch("/api/auth/session")
-                const s = await sRes.json().catch(() => null)
-                const r = s?.user?.role as string | undefined
-                const target = r === "admin" ? "/admin" : r === "teacher" ? "/teacher" : "/student"
+                if ((signInRes as any)?.error) {
+                  setError("Sign-in failed after registration")
+                  setLoading(false)
+                  return
+                }
+                const target = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/student"
                 router.push(target)
                 setLoading(false)
               }}

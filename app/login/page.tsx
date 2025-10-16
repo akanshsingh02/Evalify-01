@@ -89,11 +89,7 @@ export default function LoginPage() {
                 if (next) {
                   router.push(next)
                 } else {
-                  // Get session to determine server-authoritative role
-                  const sRes = await fetch("/api/auth/session")
-                  const s = await sRes.json().catch(() => null)
-                  const r = s?.user?.role as string | undefined
-                  const target = r === "admin" ? "/admin" : r === "teacher" ? "/teacher" : "/student"
+                  const target = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/student"
                   router.push(target)
                 }
                 setLoading(false)

@@ -45,13 +45,15 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
-  pages: { signIn: "/login" },
+  pages: { signIn: "/login", error: "/login" },
 }
+
+const nextAuth = NextAuth(authOptions)
 
 export function auth() {
   return getServerSession(authOptions)
 }
 
-export const { GET, POST } = NextAuth(authOptions)
+export const { GET, POST } = nextAuth
 
 
