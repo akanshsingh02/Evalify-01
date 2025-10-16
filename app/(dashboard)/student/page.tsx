@@ -4,6 +4,7 @@ import { PerformanceChart } from "@/components/charts/performance-chart"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 import { auth } from "@/auth"
+import { StudentTestsList } from "@/components/student-tests-list"
 
 const submissions = [
   { id: "RPT-1001", subject: "Mathematics", date: "2025-09-12", status: "Evaluated", score: 84, plag: 2 },
@@ -69,6 +70,8 @@ export default async function StudentDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <StudentTestsList />
 
       <PerformanceChart />
 

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { auth } from "@/auth"
+import { TeacherManager } from "@/components/teacher-manager"
 
 export default async function TeacherDashboard() {
   const session = await auth()
@@ -9,20 +10,13 @@ export default async function TeacherDashboard() {
   }
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create & Schedule Tests</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Placeholder UI for test creation (MCQ, short, descriptive).
-        </CardContent>
-      </Card>
+      <TeacherManager />
       <Card>
         <CardHeader>
           <CardTitle>Submissions Overview</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          AI preliminary grading preview and manual override (placeholder).
+          Manage test submissions and apply overrides.
         </CardContent>
       </Card>
       <Card>
@@ -30,7 +24,7 @@ export default async function TeacherDashboard() {
           <CardTitle>Class Analytics</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Avg score, topic difficulty, top/low performer (placeholder).
+          Coming soon.
         </CardContent>
       </Card>
     </div>
