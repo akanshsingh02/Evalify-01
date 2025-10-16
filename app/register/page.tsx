@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -93,13 +94,9 @@ export default function RegisterPage() {
                   setLoading(false)
                   return
                 }
-                // Auto sign in then redirect by server role
-                const signInRes = await fetch("/api/auth/callback/credentials", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: new URLSearchParams({ csrfToken: "", email, password }),
-                })
-                // Ignore callback response; fetch session to decide redirect
+                // Auto sign in client-side to avoid CSRF issues
+                const signInRes = await signIn("credentials", { redirect: false, email, password })
+                // Fetch session to decide redirect
                 const sRes = await fetch("/api/auth/session")
                 const s = await sRes.json().catch(() => null)
                 const r = s?.user?.role as string | undefined

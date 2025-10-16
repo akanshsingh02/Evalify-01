@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt"
 
 export async function middleware(req: Request) {
   const url = new URL(req.url)
-  const token = await getToken({ req: req as any, secret: process.env.AUTH_SECRET })
+  const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET })
 
   // Public routes
   const publicPrefixes = ["/", "/login", "/register", "/api/auth", "/api/register"]

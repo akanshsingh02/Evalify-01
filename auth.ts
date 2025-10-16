@@ -21,8 +21,12 @@ export const authOptions: NextAuthOptions = {
         await connectToDatabase()
         const user = await UserModel.findOne({ email: credentials.email }).lean()
         if (!user || !user.password) return null
-        const valid = await bcrypt.compare(credentials.password, user.password)
-        if (!valid) return null
+        try {
+          const valid = await bcrypt.compare(credentials.password, user.password)
+          if (!valid) return null
+        } catch {
+          return null
+        }
         return { id: String(user._id), email: user.email, name: user.name, role: user.role } as any
       },
     }),
