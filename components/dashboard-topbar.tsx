@@ -3,9 +3,12 @@
 import { useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export function DashboardTopbar() {
   const searchRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -41,6 +44,15 @@ export function DashboardTopbar() {
           </svg>
         </Button>
         <Button variant="outline">Profile</Button>
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            await signOut({ redirect: false })
+            router.replace("/login")
+          }}
+        >
+          Logout
+        </Button>
       </div>
     </div>
   )
