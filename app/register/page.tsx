@@ -93,8 +93,18 @@ export default function RegisterPage() {
                   setLoading(false)
                   return
                 }
-                setSuccess("Account created. You can now log in.")
-                setTimeout(() => router.push("/login"), 800)
+                // Auto sign in then redirect by server role
+                const signInRes = await fetch("/api/auth/callback/credentials", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: new URLSearchParams({ csrfToken: "", email, password }),
+                })
+                // Ignore callback response; fetch session to decide redirect
+                const sRes = await fetch("/api/auth/session")
+                const s = await sRes.json().catch(() => null)
+                const r = s?.user?.role as string | undefined
+                const target = r === "admin" ? "/admin" : r === "teacher" ? "/teacher" : "/student"
+                router.push(target)
                 setLoading(false)
               }}
               disabled={loading || !email || !password}

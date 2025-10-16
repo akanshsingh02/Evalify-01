@@ -51,7 +51,7 @@ export default function LoginPage() {
               <Progress value={strength} aria-label="Password strength" />
             </div>
             <div className="grid gap-2">
-              <Label>Role</Label>
+              <Label>Role (for preview only)</Label>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger aria-label="Select role">
                   <SelectValue placeholder="Select a role" />
@@ -86,7 +86,16 @@ export default function LoginPage() {
                   return
                 }
                 const next = params.get("next")
-                router.push(next || `/${role}`)
+                if (next) {
+                  router.push(next)
+                } else {
+                  // Get session to determine server-authoritative role
+                  const sRes = await fetch("/api/auth/session")
+                  const s = await sRes.json().catch(() => null)
+                  const r = s?.user?.role as string | undefined
+                  const target = r === "admin" ? "/admin" : r === "teacher" ? "/teacher" : "/student"
+                  router.push(target)
+                }
                 setLoading(false)
               }}
               disabled={loading || !email || !password}

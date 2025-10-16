@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { auth } from "next-auth"
+import { auth } from "@/auth"
 
 export default async function TeacherDashboard() {
   const session = await auth()

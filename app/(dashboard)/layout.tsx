@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { auth } from "next-auth"
+import { auth } from "@/auth"
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth()
