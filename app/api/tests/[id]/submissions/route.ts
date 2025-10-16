@@ -5,6 +5,7 @@ import { SubmissionModel } from "@/models/submission"
 import { TestModel } from "@/models/test"
 import { gradeAnswers } from "@/lib/grading"
 import { saveBlobToUploads } from "@/lib/storage"
+import { PerformanceModel } from "@/models/performance"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -83,6 +84,31 @@ export async function POST(req: Request, { params }: { params: Promise<{ id?: st
       autoGraded: true,
       attachments,
     })
+    try {
+      if (test && Array.isArray(test.items) && Array.isArray(results) && typeof totalScore === "number" && typeof maxScore === "number") {
+        const topicMap: Record<string, { score: number; max: number; correct: number; total: number }> = {}
+        for (let i = 0; i < (test.items as any[]).length; i++) {
+          const item: any = (test.items as any[])[i]
+          const r: any = results[i]
+          if (!r) continue
+          const topic = (item?.topic as string) || "General"
+          if (!topicMap[topic]) topicMap[topic] = { score: 0, max: 0, correct: 0, total: 0 }
+          topicMap[topic].score += Number(r.score || 0)
+          topicMap[topic].max += Number(r.maxPoints || 0)
+          topicMap[topic].total += 1
+          if (typeof r.correct === "boolean" && r.correct) topicMap[topic].correct += 1
+        }
+        const topics = Object.entries(topicMap).map(([topic, v]) => ({ topic, score: v.score, maxScore: v.max, correctCount: v.correct, totalCount: v.total }))
+        await PerformanceModel.create({
+          studentId: (session.user as any).id,
+          testId: id,
+          submissionId: String(doc._id),
+          score: totalScore,
+          maxScore: maxScore,
+          topics,
+        })
+      }
+    } catch {}
     return NextResponse.json({ submission: { id: String(doc._id) } }, { status: 201 })
   } catch (e) {
     return NextResponse.json({ error: "Failed to create submission" }, { status: 500 })

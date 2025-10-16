@@ -14,6 +14,7 @@ interface BuilderItem {
   options?: string[]
   answer?: string | string[]
   maxPoints: number
+  topic?: string
 }
 
 export function TeacherManager() {
@@ -31,12 +32,14 @@ export function TeacherManager() {
   const [newOptionsText, setNewOptionsText] = useState<string>("")
   const [newCorrectText, setNewCorrectText] = useState<string>("")
   const [newMaxPoints, setNewMaxPoints] = useState<number>(1)
+  const [newTopic, setNewTopic] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editPrompt, setEditPrompt] = useState<string>("")
   const [editMaxPoints, setEditMaxPoints] = useState<number>(1)
   const [editOptionsText, setEditOptionsText] = useState<string>("")
   const [editAnswerText, setEditAnswerText] = useState<string>("")
+  const [editTopic, setEditTopic] = useState<string>("")
 
   async function loadTests() {
     const res = await fetch("/api/tests")
@@ -97,6 +100,10 @@ export function TeacherManager() {
               <label className="text-xs">Max Points</label>
               <input className="h-9 rounded-md border px-2 text-sm" type="number" min={1} value={newMaxPoints} onChange={(e) => setNewMaxPoints(Number(e.target.value) || 1)} />
             </div>
+            <div className="grid gap-1">
+              <label className="text-xs">Topic (optional)</label>
+              <Input className="h-9" placeholder="e.g. Algebra" value={newTopic} onChange={(e) => setNewTopic(e.target.value)} />
+            </div>
           </div>
           <div className="mt-2 grid gap-2">
             <div className="grid gap-1">
@@ -136,7 +143,7 @@ export function TeacherManager() {
                 const pts = Number(newMaxPoints) || 1
                 if (!prompt) return alert("Prompt is required")
                 if (pts < 1) return alert("Max points must be at least 1")
-                const base: BuilderItem = { id: `q${Date.now()}`, type: newType, prompt, maxPoints: pts }
+                const base: BuilderItem = { id: `q${Date.now()}`, type: newType, prompt, maxPoints: pts, topic: newTopic.trim() || undefined }
                 if (newType === "mcq") {
                   const options = newOptionsText.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
                   if (options.length < 2) return alert("MCQ requires at least 2 options")
@@ -154,6 +161,7 @@ export function TeacherManager() {
                 setNewOptionsText("")
                 setNewCorrectText("")
                 setNewMaxPoints(1)
+                setNewTopic("")
               }}
             >
               Add Item
@@ -204,6 +212,7 @@ export function TeacherManager() {
                           setEditMaxPoints(it.maxPoints)
                           setEditOptionsText(Array.isArray(it.options) ? it.options.join("\n") : "")
                           setEditAnswerText(Array.isArray(it.answer) ? it.answer.join(",") : (it.answer || ""))
+                          setEditTopic(it.topic || "")
                         }}>Edit</Button>
                       )}
                       <Button size="sm" variant="outline" onClick={() => setItems((prev) => prev.filter((x) => x.id !== it.id))}>Remove</Button>
@@ -218,6 +227,10 @@ export function TeacherManager() {
                       <div className="grid gap-1">
                         <label className="text-xs">Max Points</label>
                         <Input type="number" className="h-9" value={editMaxPoints} onChange={(e) => setEditMaxPoints(Number(e.target.value) || 1)} />
+                      </div>
+                      <div className="grid gap-1">
+                        <label className="text-xs">Topic (optional)</label>
+                        <Input className="h-9" value={editTopic} onChange={(e) => setEditTopic(e.target.value)} />
                       </div>
                       {it.type === "mcq" && (
                         <>
@@ -241,7 +254,7 @@ export function TeacherManager() {
                         <Button size="sm" onClick={() => {
                           setItems((prev) => prev.map((x) => {
                             if (x.id !== it.id) return x
-                            const updated: BuilderItem = { ...x, prompt: editPrompt.trim(), maxPoints: Number(editMaxPoints) || 1 }
+                            const updated: BuilderItem = { ...x, prompt: editPrompt.trim(), maxPoints: Number(editMaxPoints) || 1, topic: editTopic.trim() || undefined }
                             if (x.type === "mcq") {
                               const options = editOptionsText.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
                               const tokens = editAnswerText.split(",").map((s) => s.trim()).filter(Boolean)
@@ -257,12 +270,14 @@ export function TeacherManager() {
                           setEditMaxPoints(1)
                           setEditOptionsText("")
                           setEditAnswerText("")
+                          setEditTopic("")
                         }}>Save</Button>
                       </div>
                     </div>
                   ) : (
                     <>
                       <div className="mt-1">{it.prompt}</div>
+                      {it.topic && <div className="mt-1 text-xs text-muted-foreground">Topic: {it.topic}</div>}
                       {it.type === "mcq" && Array.isArray(it.options) && (
                         <div className="mt-1 grid gap-1">
                           {it.options.map((o) => (
@@ -364,6 +379,12 @@ export function TeacherManager() {
                 >
                   Edit Schedule
                 </Button>
+                <a
+                  href={`/teacher/tests/${t._id}/analytics`}
+                  className="rounded-md border px-2 py-1 text-xs hover:bg-muted"
+                >
+                  View Analytics
+                </a>
                 <Button size="sm" onClick={() => setSelectedTestId(String(t._id))}>
                   View Submissions
                 </Button>
