@@ -41,6 +41,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id?: stri
     if (typeof body?.description === "string") test.description = body.description
     if (Array.isArray(body?.questions)) test.questions = body.questions
     if (typeof body?.status === "string" && ["draft", "published"].includes(body.status)) test.status = body.status
+    if (Array.isArray(body?.items)) test.items = body.items
     if (Object.prototype.hasOwnProperty.call(body || {}, "startAt")) {
       test.startAt = body.startAt ? new Date(body.startAt) : null
     }

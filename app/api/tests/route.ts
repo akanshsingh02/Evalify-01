@@ -54,6 +54,7 @@ export async function POST(req: Request) {
     status: body.status === "published" ? "published" : "draft",
     startAt: body.startAt ? new Date(body.startAt) : null,
     endAt: body.endAt ? new Date(body.endAt) : null,
+    items: Array.isArray(body.items) ? body.items : [],
   })
   return NextResponse.json({ test: { id: String(doc._id) } }, { status: 201 })
 }

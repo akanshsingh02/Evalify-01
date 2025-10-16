@@ -6,6 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 
+function safeParseItems(json: string): any[] {
+  if (!json || !json.trim()) return []
+  try {
+    const parsed = JSON.parse(json)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export function TeacherManager() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -15,6 +25,7 @@ export function TeacherManager() {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [startAt, setStartAt] = useState<string>("")
   const [endAt, setEndAt] = useState<string>("")
+  const [itemsJson, setItemsJson] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
   async function loadTests() {
@@ -61,6 +72,7 @@ export function TeacherManager() {
             placeholder="End time"
           />
         </div>
+        <Textarea placeholder='Items JSON (e.g., [{"id":"q1","type":"mcq","prompt":"2+2?","options":["3","4"],"answer":"4","maxPoints":2}])' value={itemsJson} onChange={(e) => setItemsJson(e.target.value)} />
         <div className="flex gap-2">
           <Button
             disabled={loading || !title}
@@ -69,7 +81,7 @@ export function TeacherManager() {
               await fetch("/api/tests", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, questions, status: "draft", startAt, endAt }),
+                body: JSON.stringify({ title, description, questions, status: "draft", startAt, endAt, items: safeParseItems(itemsJson) }),
               })
               setTitle("")
               setDescription("")
@@ -90,7 +102,7 @@ export function TeacherManager() {
               await fetch("/api/tests", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title, description, questions, status: "published", startAt, endAt }),
+                body: JSON.stringify({ title, description, questions, status: "published", startAt, endAt, items: safeParseItems(itemsJson) }),
               })
               setTitle("")
               setDescription("")
@@ -144,6 +156,20 @@ export function TeacherManager() {
                 </Button>
                 <Button size="sm" onClick={() => setSelectedTestId(String(t._id))}>
                   View Submissions
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const val = prompt("Paste Items JSON to replace", JSON.stringify(t.items || [], null, 2))
+                    if (val == null) return
+                    let parsed: any[] = []
+                    try { parsed = JSON.parse(val) } catch {}
+                    await fetch(`/api/tests/${t._id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: parsed }) })
+                    await loadTests()
+                  }}
+                >
+                  Replace Items
                 </Button>
               </div>
             </div>

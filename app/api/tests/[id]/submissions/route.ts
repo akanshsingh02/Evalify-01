@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { connectToDatabase } from "@/lib/mongodb"
 import { SubmissionModel } from "@/models/submission"
+import { TestModel } from "@/models/test"
+import { gradeAnswers } from "@/lib/grading"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -36,12 +38,28 @@ export async function POST(req: Request, { params }: { params: Promise<{ id?: st
     await connectToDatabase()
     const body = await req.json().catch(() => null)
     if (!Array.isArray(body?.answers)) return NextResponse.json({ error: "answers required" }, { status: 400 })
-    const score = Math.floor(Math.random() * 41) + 60
+    const test = await TestModel.findById(id).lean()
+    let score = 0
+    let results: any[] = []
+    let totalScore: number | undefined
+    let maxScore: number | undefined
+    if (test && Array.isArray(test.items) && test.items.length > 0) {
+      const graded = gradeAnswers(test.items as any, body.answers)
+      results = graded.results
+      totalScore = graded.totalScore
+      maxScore = graded.maxScore
+      score = totalScore
+    } else {
+      score = Math.floor(Math.random() * 41) + 60
+    }
     const doc = await SubmissionModel.create({
       testId: id,
       studentId: (session.user as any).id,
       answers: body.answers,
       score,
+      results,
+      totalScore,
+      maxScore,
       autoGraded: true,
     })
     return NextResponse.json({ submission: { id: String(doc._id) } }, { status: 201 })

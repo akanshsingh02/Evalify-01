@@ -5,6 +5,9 @@ export interface SubmissionDoc extends mongoose.Document {
   studentId: string
   answers: string[]
   score?: number
+  results?: Array<{ score: number; maxPoints: number; correct?: boolean; similarity?: number }>
+  totalScore?: number
+  maxScore?: number
   overriddenScore?: number | null
   autoGraded: boolean
   createdAt: Date
@@ -15,6 +18,9 @@ const SubmissionSchema = new Schema<SubmissionDoc>({
   studentId: { type: String, required: true, index: true },
   answers: { type: [String], default: [] },
   score: { type: Number },
+  results: { type: [Object], default: [] },
+  totalScore: { type: Number },
+  maxScore: { type: Number },
   overriddenScore: { type: Number, default: null },
   autoGraded: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
