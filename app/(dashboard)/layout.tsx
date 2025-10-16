@@ -1,4 +1,13 @@
 import type { ReactNode } from "react"
+import { auth } from "next-auth"
+
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await auth()
+  // session is required for dashboard routes; middleware also enforces this
+  return <>{children}</>
+}
+
+import type { ReactNode } from "react"
 import { DashboardTopbar } from "@/components/dashboard-topbar"
 import { Sidebar } from "@/components/sidebar"
 

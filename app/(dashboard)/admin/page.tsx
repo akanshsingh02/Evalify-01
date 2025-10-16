@@ -1,6 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { auth } from "next-auth"
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const session = await auth()
+  if (!session || (session.user as any)?.role !== "admin") {
+    return null
+  }
   return (
     <div className="grid gap-4">
       <Card>

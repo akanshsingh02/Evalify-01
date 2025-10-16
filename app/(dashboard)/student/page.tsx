@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { PerformanceChart } from "@/components/charts/performance-chart"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 const submissions = [
   { id: "RPT-1001", subject: "Mathematics", date: "2025-09-12", status: "Evaluated", score: 84, plag: 2 },
@@ -13,6 +14,11 @@ const submissions = [
 ]
 
 export default function StudentDashboard() {
+  const { data: session } = useSession()
+  const role = (session?.user as any)?.role
+  if (!session || !["student", "admin"].includes(role)) {
+    return null
+  }
   return (
     <div className="grid gap-4">
       <div className="grid gap-4 md:grid-cols-3">
