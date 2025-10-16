@@ -10,14 +10,19 @@ export default function Page() {
       <Navbar />
       <main className="mx-auto max-w-6xl px-4">
         {/* Enhanced hero with image, animations, and stronger CTA */}
-        <section className="py-16">
+        <section className="relative overflow-hidden py-16">
+          {/* Animated background blobs */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+            <div className="blob absolute -top-10 left-10 h-48 w-48 rounded-full bg-primary/30" />
+            <div className="blob absolute bottom-0 right-24 h-56 w-56 rounded-full bg-secondary/30 [animation-delay:400ms]" />
+          </div>
           <div className="mx-auto grid max-w-6xl items-center gap-8 px-0 md:grid-cols-2">
             <div className="text-center md:text-left">
               <div className="mx-auto inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground md:mx-0">
                 <span className="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
                 New: Role-based dashboards
               </div>
-              <h1 className="animate-fade-in-up text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+              <h1 className="animate-fade-in-up gradient-text text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
                 AI-Powered Evaluation System
               </h1>
               <p className="animate-fade-in-up mt-4 text-pretty text-muted-foreground [animation-delay:120ms]">
@@ -25,7 +30,7 @@ export default function Page() {
               </p>
               <div className="animate-fade-in-up mt-6 flex items-center justify-center gap-3 md:justify-start [animation-delay:200ms]">
                 <Link href="/register">
-                  <Button size="lg" className="hover-lift">
+                  <Button size="lg" className="hover-lift shimmer">
                     Get Started
                   </Button>
                 </Link>
@@ -40,7 +45,7 @@ export default function Page() {
               <img
                 src="/students-in-classroom-using-laptops.jpg"
                 alt="Students using Evalify in a classroom"
-                className="mx-auto h-auto w-full max-w-[560px] rounded-lg border animate-float"
+                className="mx-auto h-auto w-full max-w-[560px] rounded-lg border animate-float shimmer"
                 loading="lazy"
               />
             </div>
@@ -48,12 +53,13 @@ export default function Page() {
         </section>
 
         {/* Add screenshots carousel to showcase UI */}
-        <section className="py-6">
+        <section className="relative py-10">
+          {/* Animated gradient band */}
+          <div aria-hidden className="animated-gradient absolute inset-x-0 top-0 -z-10 h-40 w-full opacity-30 blur-2xl" />
           <div className="mx-auto max-w-6xl">
             <div className="mb-4 text-center">
               <p className="text-sm text-muted-foreground">Preview the interface</p>
             </div>
-            {/* @ts-expect-error Server/Client boundary allowed in Next.js */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <HeroScreens /> {/* Using the new HeroScreens component */}
           </div>
