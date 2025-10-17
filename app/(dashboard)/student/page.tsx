@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PerformanceChart } from "@/components/charts/performance-chart"
 import { StudentAssignmentsPanel } from "@/components/student-assignments-panel"
+import { PerformanceSummary } from "@/components/performance-summary"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 import { auth } from "@/auth"
@@ -73,6 +74,7 @@ export default async function StudentDashboard() {
       </div>
 
       <StudentTestsList />
+      <PerformanceSummary />
       <StudentAssignmentsPanel />
 
       <PerformanceChart />

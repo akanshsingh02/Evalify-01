@@ -42,12 +42,32 @@ export default function Page() {
               </div>
             </div>
             <div className="order-first md:order-none">
-              <img
-                src="/students-in-classroom-using-laptops.jpg"
-                alt="Students using Evalify in a classroom"
-                className="mx-auto h-auto w-full max-w-[560px] rounded-lg border animate-float shimmer"
-                loading="lazy"
-              />
+              {/* Inline animated mock illustration (replaces external photo) */}
+              <div className="mx-auto w-full max-w-[560px] animate-float">
+                <div className="rounded-lg border bg-card shadow-sm">
+                  {/* Title bar */}
+                  <div className="flex items-center gap-2 border-b px-4 py-2">
+                    <span className="h-2 w-2 rounded-full bg-red-400" />
+                    <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                    <span className="h-2 w-2 rounded-full bg-green-400" />
+                    <div className="ml-3 h-4 w-24 rounded bg-muted" />
+                  </div>
+                  {/* Content */}
+                  <div className="animated-gradient p-4">
+                    <div className="grid gap-3 rounded-md bg-card/70 p-4">
+                      <div className="h-3 w-3/5 rounded bg-muted shimmer" />
+                      <div className="h-2 w-2/5 rounded bg-muted shimmer [animation-delay:200ms]" />
+                      <div className="mt-2 grid grid-cols-3 gap-3">
+                        <div className="h-24 rounded-md border bg-card shimmer" />
+                        <div className="h-24 rounded-md border bg-card shimmer [animation-delay:150ms]" />
+                        <div className="h-24 rounded-md border bg-card shimmer [animation-delay:300ms]" />
+                      </div>
+                      <div className="mt-2 h-2 w-4/5 rounded bg-muted shimmer [animation-delay:400ms]" />
+                      <div className="h-2 w-2/3 rounded bg-muted shimmer [animation-delay:600ms]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>

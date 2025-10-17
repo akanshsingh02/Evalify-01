@@ -1,4 +1,90 @@
 import { NextResponse } from "next/server"
+import { connectToDatabase } from "@/lib/mongodb"
+import { SubmissionModel } from "@/models/submission"
+import { TestModel, type TestDoc, type TestItem } from "@/models/test"
+import { requireRole } from "@/lib/authz"
+import { aiEvaluateSubjective, aiPlagiarismScore } from "@/lib/ai"
+
+function normalize(s?: string) {
+  return (s || "").trim().toLowerCase().replace(/\s+/g, " ")
+}
+
+function scoreSubjective(expected: string | undefined, actual: string | undefined): number {
+  if (!expected || !actual) return 0
+  const a = normalize(actual)
+  const e = normalize(expected)
+  if (!a || !e) return 0
+  const aWords = new Set(a.split(" "))
+  const eWords = new Set(e.split(" "))
+  let overlap = 0
+  eWords.forEach((w) => {
+    if (aWords.has(w)) overlap++
+  })
+  return overlap / Math.max(1, eWords.size)
+}
+
+export async function POST(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    const session = await requireRole(["student", "admin"])
+    const { answers } = await req.json()
+    if (!Array.isArray(answers)) return NextResponse.json({ error: "answers array required" }, { status: 400 })
+
+    await connectToDatabase()
+    const test = (await TestModel.findById(params.id).lean()) as TestDoc | null
+    if (!test) return NextResponse.json({ error: "Test not found" }, { status: 404 })
+
+    let total = 0
+    let max = 0
+    const results: Array<{ score: number; maxPoints: number; correct?: boolean; similarity?: number; feedback?: string; hints?: string[] }> = []
+    ;(test.items || []).forEach((item: TestItem, idx: number) => {
+      const given = answers[idx]
+      const mp = item.maxPoints || 1
+      max += mp
+      if (item.type === "mcq" || item.type === "short") {
+        const correct = Array.isArray(item.answer)
+          ? Array.isArray(given) && normalize(given.join(",")) === normalize((item.answer as string[]).join(","))
+          : normalize(String(given || "")) === normalize(String(item.answer || ""))
+        const sc = correct ? mp : 0
+        total += sc
+        results.push({ score: sc, maxPoints: mp, correct })
+      } else if (item.type === "descriptive") {
+        const expected = String(item.answer || "")
+        const actual = String(given || "")
+        const ai = await aiEvaluateSubjective(expected, actual)
+        const sim = typeof ai.similarity === "number" ? ai.similarity : scoreSubjective(expected, actual)
+        const sc = Math.round(sim * mp)
+        total += sc
+        results.push({ score: sc, maxPoints: mp, similarity: sim, feedback: ai.feedback, hints: ai.hints })
+      }
+    })
+
+    const textForPlag = (answers || []).filter((a: any) => typeof a === "string").join("\n")
+    const plag = await aiPlagiarismScore(textForPlag)
+
+    const created = await SubmissionModel.create({
+      testId: params.id,
+      studentId: (session.user as any).id,
+      answers,
+      score: total,
+      totalScore: total,
+      maxScore: max,
+      autoGraded: true,
+      status: "Evaluated",
+      results,
+      attachments: [],
+    })
+
+    return NextResponse.json({ item: created, plagiarism: plag })
+  } catch (e: any) {
+    const code = e?.message === "UNAUTHORIZED" ? 401 : e?.message === "FORBIDDEN" ? 403 : 500
+    return NextResponse.json({ error: "Failed to submit" }, { status: code })
+  }
+}
+
+import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { connectToDatabase } from "@/lib/mongodb"
 import { SubmissionModel } from "@/models/submission"

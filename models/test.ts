@@ -1,15 +1,23 @@
 import mongoose, { Schema, Model } from "mongoose"
 
+export interface TestItem {
+  id: string
+  type: "mcq" | "short" | "descriptive"
+  prompt: string
+  options?: string[]
+  answer?: string | string[]
+  maxPoints: number
+}
+
 export interface TestDoc extends mongoose.Document {
   teacherId: string
   title: string
   paperUrl?: string
   description?: string
-  questions?: string[]
   status?: "draft" | "published"
   startAt?: Date | null
   endAt?: Date | null
-  items?: any[]
+  items: TestItem[]
   scheduleAt?: Date
   createdAt: Date
 }
@@ -19,11 +27,10 @@ const TestSchema = new Schema<TestDoc>({
   title: { type: String, required: true },
   paperUrl: { type: String },
   description: { type: String },
-  questions: { type: [String], default: [] },
   status: { type: String, enum: ["draft", "published"], default: "draft" },
   startAt: { type: Date, default: null },
   endAt: { type: Date, default: null },
-  items: { type: Schema.Types.Mixed, default: [] },
+  items: { type: [Object], default: [] },
   scheduleAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
 })

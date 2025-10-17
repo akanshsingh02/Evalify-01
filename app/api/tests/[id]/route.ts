@@ -1,4 +1,24 @@
 import { NextResponse } from "next/server"
+import { connectToDatabase } from "@/lib/mongodb"
+import { TestModel } from "@/models/test"
+import { requireAuth } from "@/lib/authz"
+
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    await requireAuth()
+    await connectToDatabase()
+    const test = await TestModel.findById(params.id)
+    if (!test) return NextResponse.json({ error: "Not found" }, { status: 404 })
+    return NextResponse.json({ item: test })
+  } catch {
+    return NextResponse.json({ error: "Failed" }, { status: 500 })
+  }
+}
+
+import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { connectToDatabase } from "@/lib/mongodb"
 import { TestModel } from "@/models/test"

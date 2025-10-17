@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { auth } from "@/auth"
-import { AdminPanel } from "@/components/admin-panel"
+import { AdminUsersPanel } from "@/components/admin-users-panel"
 
 export default async function AdminDashboard() {
   const session = await auth()
@@ -9,7 +8,7 @@ export default async function AdminDashboard() {
   }
   return (
     <div className="grid gap-4">
-      <AdminPanel />
+      <AdminUsersPanel />
     </div>
   )
 }

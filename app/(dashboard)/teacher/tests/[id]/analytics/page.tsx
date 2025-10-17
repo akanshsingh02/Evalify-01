@@ -1,4 +1,5 @@
 import { auth } from "@/auth"
+import { TeacherAnalyticsCharts } from "@/components/teacher-analytics-charts"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -27,16 +28,7 @@ export default async function TeacherTestAnalytics({ params }: { params: Promise
       ) : (
         <div className="text-sm text-muted-foreground">No data</div>
       )}
-      <div className="grid gap-2">
-        <div className="text-sm font-medium">Topic-wise performance</div>
-        {topics.length === 0 && <div className="text-sm text-muted-foreground">No topic data</div>}
-        {topics.map((t: any) => (
-          <div key={t.topic} className="rounded border p-2 text-sm flex items-center justify-between">
-            <div>{t.topic}</div>
-            <div className="text-xs text-muted-foreground">Avg: {t.avgPercent}% · Correct rate: {t.correctRate || 0}% · Questions: {t.totalQuestions || 0}</div>
-          </div>
-        ))}
-      </div>
+      <TeacherAnalyticsCharts summary={summary || {}} topics={topics} />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { auth } from "@/auth"
 import { TeacherManager } from "@/components/teacher-manager"
 import { TeacherTestsPanel } from "@/components/teacher-tests-panel"
+import { TeacherTestBuilder } from "@/components/teacher-test-builder"
 
 export default async function TeacherDashboard() {
   const session = await auth()
@@ -11,6 +12,7 @@ export default async function TeacherDashboard() {
   }
   return (
     <div className="grid gap-4">
+      <TeacherTestBuilder />
       <TeacherTestsPanel />
       <TeacherManager />
       <Card>

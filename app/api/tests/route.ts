@@ -15,16 +15,16 @@ export async function GET(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const role = (session.user as any)?.role as string
   if (role === "admin") {
-    const tests = await TestModel.find({}).sort({ createdAt: -1 }).lean()
-    return NextResponse.json({ tests })
+    const items = await TestModel.find({}).sort({ createdAt: -1 }).lean()
+    return NextResponse.json({ items })
   }
   if (role === "teacher") {
-    const tests = await TestModel.find({ teacherId: (session.user as any).id }).sort({ createdAt: -1 }).lean()
-    return NextResponse.json({ tests })
+    const items = await TestModel.find({ teacherId: (session.user as any).id }).sort({ createdAt: -1 }).lean()
+    return NextResponse.json({ items })
   }
   if (role === "student") {
     const now = new Date()
-    const tests = await TestModel.find({
+    const items = await TestModel.find({
       status: "published",
       $and: [
         { $or: [{ startAt: null }, { startAt: { $lte: now } }] },
@@ -33,9 +33,9 @@ export async function GET(req: Request) {
     })
       .sort({ createdAt: -1 })
       .lean()
-    return NextResponse.json({ tests })
+    return NextResponse.json({ items })
   }
-  return NextResponse.json({ tests: [] })
+  return NextResponse.json({ items: [] })
 }
 
 export async function POST(req: Request) {
